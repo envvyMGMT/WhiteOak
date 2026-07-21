@@ -410,12 +410,19 @@
       <div class="form-card reveal">
         <div class="fh">// Free Quote</div>
         <div class="ft">Request a quote</div>
-        <!-- MAKE THIS FORM DELIVER TO YOU (no backend needed):
-             1. Create a free form at https://formspree.io (or Netlify Forms / Basin)
-             2. Put your endpoint in action="" below, e.g. action="https://formspree.io/f/xxxxxxx"
-             Until an action is set, submitting shows the success message but does NOT email you. -->
-        <form id="quoteForm" action="" method="POST">
+        <!-- ============================================================
+             MAKE THIS FORM EMAIL YOU (no backend / server needed):
+             1. Go to https://formspree.io → sign up (free: 50 leads/mo) →
+                "New form" → copy your endpoint (looks like f/abcdwxyz).
+             2. Replace YOUR_FORM_ID in the action="" below with it.
+             That's it — leads land in your inbox and the success message shows.
+             (Zero-signup alt: set action="https://formsubmit.co/you@email.com")
+             Until you set a real endpoint, it just shows the demo success. -->
+        <form id="quoteForm" action="https://formspree.io/f/YOUR_FORM_ID" method="POST">
           <div class="form-body">
+            <!-- honeypot: hidden from people, catches bots -->
+            <input type="text" name="_gotcha" tabindex="-1" autocomplete="off" aria-hidden="true" style="position:absolute;left:-9999px;width:1px;height:1px;opacity:0">
+            <input type="hidden" name="_subject" value="New Blackbeam quote request">
             <div class="field-row">
               <div class="field"><label>Name <span class="req">*</span></label><input type="text" name="name" placeholder="Your name" required></div>
               <div class="field"><label>Phone <span class="req">*</span></label><input type="tel" name="phone" placeholder="(417) 000-0000" required></div>

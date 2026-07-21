@@ -357,6 +357,20 @@ h1,h2,h3,h4{margin:0;font-family:var(--font-head);font-weight:800;text-transform
 .menu-pop button svg{width:17px;height:17px;fill:none;stroke:currentColor;stroke-width:1.9;color:var(--muted)}
 .menu-pop .sep{height:1px;background:var(--line);margin:5px 0}
 
+/* ============================================================ DEMO FLAG */
+.demo-flag{position:fixed;left:20px;bottom:20px;z-index:80;display:flex;align-items:center;gap:12px;padding:9px 10px 9px 13px;background:var(--surface);border:1px solid var(--line-2);border-radius:12px;box-shadow:var(--shadow);max-width:calc(100vw - 40px)}
+.demo-flag.hide{display:none}
+.df-badge{display:flex;align-items:center;gap:6px;font-family:var(--font-mono);font-size:10.5px;font-weight:600;letter-spacing:.08em;color:var(--hivis);background:var(--hivis-soft);padding:4px 9px;border-radius:20px;white-space:nowrap;flex:none}
+.df-dot{width:6px;height:6px;border-radius:50%;background:var(--hivis);animation:dfpulse 2.2s infinite}
+@keyframes dfpulse{0%{box-shadow:0 0 0 0 rgba(255,90,30,.5)}70%{box-shadow:0 0 0 6px rgba(255,90,30,0)}100%{box-shadow:0 0 0 0 rgba(255,90,30,0)}}
+.df-txt{font-size:12.5px;color:var(--ink-2);white-space:nowrap}
+.df-cta{display:inline-flex;align-items:center;gap:5px;font-size:12.5px;font-weight:600;color:var(--hivis);white-space:nowrap}
+.df-cta svg{width:14px;height:14px;fill:none;stroke:currentColor;stroke-width:2.2}
+.df-cta:hover{text-decoration:underline}
+.df-x{width:24px;height:24px;border-radius:6px;color:var(--muted);font-size:19px;line-height:1;display:grid;place-items:center;flex:none}
+.df-x:hover{background:var(--surface-2);color:var(--ink)}
+@media(max-width:680px){.df-txt{display:none}}
+
 /* ============================================================ RESPONSIVE */
 .sidebar-scrim{display:none}
 @media(max-width:1080px){

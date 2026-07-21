@@ -39,17 +39,34 @@
     });
   });
 
-  // QUOTE form (client-side demo until a Formspree/Netlify action="" is set)
+  // QUOTE form — AJAX submit to Formspree/FormSubmit (no page reload).
   var form=document.getElementById('quoteForm');
   if(form){
     var success=document.getElementById('formSuccess');
+    function showSuccess(){
+      form.classList.add('sent');
+      success.classList.add('show');
+      success.scrollIntoView({behavior:'smooth',block:'center'});
+    }
     form.addEventListener('submit',function(e){
-      if(!form.getAttribute('action')){
-        e.preventDefault();
-        form.classList.add('sent');
-        success.classList.add('show');
-        success.scrollIntoView({behavior:'smooth',block:'center'});
-      }
+      e.preventDefault();
+      // honeypot — if a bot filled the hidden field, silently drop it
+      var hp=form.querySelector('[name="_gotcha"]');
+      if(hp&&hp.value){return;}
+      var action=form.getAttribute('action')||'';
+      // Not configured yet → just show the demo success (does NOT email you)
+      if(!action||action.indexOf('YOUR_FORM_ID')!==-1){showSuccess();return;}
+      var btn=form.querySelector('.form-submit'),label=btn?btn.textContent:'';
+      if(btn){btn.disabled=true;btn.textContent='Sending…';}
+      fetch(action,{method:'POST',body:new FormData(form),headers:{'Accept':'application/json'}})
+        .then(function(r){
+          if(r.ok){form.reset();showSuccess();}
+          else{throw new Error('bad response');}
+        })
+        .catch(function(){
+          if(btn){btn.disabled=false;btn.textContent=label;}
+          alert('Sorry — something went wrong sending that. Please call or text (417) 555-0100 and we’ll take care of you.');
+        });
     });
   }
 

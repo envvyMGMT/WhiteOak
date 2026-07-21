@@ -448,6 +448,16 @@
 
   document.addEventListener('automations:changed', updateCounts);
 
+  // demo flag (dismiss remembered)
+  const demoFlag = $('#demoFlag');
+  if (demoFlag) {
+    if (localStorage.getItem('bb-os-demoflag') === 'off') demoFlag.classList.add('hide');
+    $('#demoFlagX')?.addEventListener('click', () => {
+      demoFlag.classList.add('hide');
+      localStorage.setItem('bb-os-demoflag', 'off');
+    });
+  }
+
   // boot
   window.addEventListener('hashchange', route);
   updateCounts();
