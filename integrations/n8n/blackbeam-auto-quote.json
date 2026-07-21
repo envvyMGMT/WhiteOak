@@ -85,7 +85,7 @@
         },
         "sendBody": true,
         "specifyBody": "json",
-        "jsonBody": "={\n  \"from\": \"Blackbeam <quotes@blackbeam.co>\",\n  \"to\": [\"{{ $('Parse Quote').first().json.lead.email }}\"],\n  \"subject\": \"Your Blackbeam quote — {{ $('Parse Quote').first().json.lead.service }}\",\n  \"text\": \"{{ $('Parse Quote').first().json.quote.message }}\"\n}",
+        "jsonBody": "={\n  \"from\": \"Blackbeam <quotes@groundrise.us>\",\n  \"to\": [\"{{ $('Parse Quote').first().json.lead.email }}\"],\n  \"subject\": \"Your Blackbeam quote — {{ $('Parse Quote').first().json.lead.service }}\",\n  \"text\": \"{{ $('Parse Quote').first().json.quote.message }}\"\n}",
         "options": {}
       },
       "id": "resend",
