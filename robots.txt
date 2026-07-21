@@ -1,0 +1,5 @@
+User-agent: *
+Allow: /
+
+# EDIT: replace with your real domain
+Sitemap: https://blackbeam.co/sitemap.xml
