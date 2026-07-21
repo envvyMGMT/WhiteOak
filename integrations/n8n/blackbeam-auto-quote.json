@@ -1,0 +1,119 @@
+{
+  "name": "Blackbeam — Auto Quote",
+  "nodes": [
+    {
+      "parameters": {
+        "httpMethod": "POST",
+        "path": "blackbeam-quote",
+        "responseMode": "responseNode",
+        "options": {}
+      },
+      "id": "webhook",
+      "name": "Quote Request (Webhook)",
+      "type": "n8n-nodes-base.webhook",
+      "typeVersion": 2,
+      "position": [-40, 300],
+      "webhookId": "blackbeam-quote"
+    },
+    {
+      "parameters": {
+        "method": "POST",
+        "url": "https://api.anthropic.com/v1/messages",
+        "sendHeaders": true,
+        "headerParameters": {
+          "parameters": [
+            { "name": "x-api-key", "value": "={{ $env.ANTHROPIC_API_KEY }}" },
+            { "name": "anthropic-version", "value": "2023-06-01" },
+            { "name": "content-type", "value": "application/json" }
+          ]
+        },
+        "sendBody": true,
+        "specifyBody": "json",
+        "jsonBody": "={\n  \"model\": \"claude-sonnet-5\",\n  \"max_tokens\": 1024,\n  \"system\": \"You are the estimator for Blackbeam, a licensed general contractor in Springfield, MO. From the lead details, draft a friendly, plain-English preliminary quote. Return ONLY strict JSON: {\\\"amount\\\": number, \\\"summary\\\": string, \\\"line_items\\\": [{\\\"label\\\": string, \\\"cost\\\": number}], \\\"message\\\": string}. The message is a short note to the customer with the ballpark and a next step. Prices are rough estimates pending a site visit.\",\n  \"messages\": [\n    { \"role\": \"user\", \"content\": \"Name: {{ $json.body.name }}\\nJob: {{ $json.body.service }}\\nDetails: {{ $json.body.details }}\\nPhone: {{ $json.body.phone }}\\nEmail: {{ $json.body.email }}\" }\n  ]\n}",
+        "options": {}
+      },
+      "id": "claude",
+      "name": "Claude — Draft Quote",
+      "type": "n8n-nodes-base.httpRequest",
+      "typeVersion": 4.2,
+      "position": [220, 300]
+    },
+    {
+      "parameters": {
+        "jsCode": "// Parse Claude's JSON reply and merge with the original lead\nconst body = $('Quote Request (Webhook)').first().json.body;\nlet quote = {};\ntry { quote = JSON.parse($json.content[0].text); } catch (e) { quote = { amount: 0, summary: 'Draft failed to parse', message: 'Thanks — we will follow up shortly.', line_items: [] }; }\nreturn [{ json: { lead: body, quote } }];"
+      },
+      "id": "parse",
+      "name": "Parse Quote",
+      "type": "n8n-nodes-base.code",
+      "typeVersion": 2,
+      "position": [480, 300]
+    },
+    {
+      "parameters": {
+        "method": "POST",
+        "url": "={{ $env.SUPABASE_URL }}/rest/v1/leads",
+        "sendHeaders": true,
+        "headerParameters": {
+          "parameters": [
+            { "name": "apikey", "value": "={{ $env.SUPABASE_SERVICE_KEY }}" },
+            { "name": "Authorization", "value": "=Bearer {{ $env.SUPABASE_SERVICE_KEY }}" },
+            { "name": "Content-Type", "value": "application/json" },
+            { "name": "Prefer", "value": "return=representation" }
+          ]
+        },
+        "sendBody": true,
+        "specifyBody": "json",
+        "jsonBody": "={\n  \"org_id\": \"{{ $env.BLACKBEAM_ORG_ID }}\",\n  \"name\": \"{{ $json.lead.name }}\",\n  \"phone\": \"{{ $json.lead.phone }}\",\n  \"email\": \"{{ $json.lead.email }}\",\n  \"source\": \"Website form\",\n  \"job\": \"{{ $json.lead.service }}\",\n  \"status\": \"Quoted\",\n  \"est_value\": {{ $json.quote.amount || 0 }}\n}",
+        "options": {}
+      },
+      "id": "supabase",
+      "name": "Save Lead → Supabase",
+      "type": "n8n-nodes-base.httpRequest",
+      "typeVersion": 4.2,
+      "position": [740, 200]
+    },
+    {
+      "parameters": {
+        "method": "POST",
+        "url": "https://api.resend.com/emails",
+        "sendHeaders": true,
+        "headerParameters": {
+          "parameters": [
+            { "name": "Authorization", "value": "=Bearer {{ $env.RESEND_API_KEY }}" },
+            { "name": "Content-Type", "value": "application/json" }
+          ]
+        },
+        "sendBody": true,
+        "specifyBody": "json",
+        "jsonBody": "={\n  \"from\": \"Blackbeam <quotes@blackbeam.co>\",\n  \"to\": [\"{{ $('Parse Quote').first().json.lead.email }}\"],\n  \"subject\": \"Your Blackbeam quote — {{ $('Parse Quote').first().json.lead.service }}\",\n  \"text\": \"{{ $('Parse Quote').first().json.quote.message }}\"\n}",
+        "options": {}
+      },
+      "id": "resend",
+      "name": "Email Customer",
+      "type": "n8n-nodes-base.httpRequest",
+      "typeVersion": 4.2,
+      "position": [740, 400]
+    },
+    {
+      "parameters": {
+        "respondWith": "json",
+        "responseBody": "={ \"ok\": true, \"summary\": \"{{ $('Parse Quote').first().json.quote.summary }}\" }",
+        "options": {}
+      },
+      "id": "respond",
+      "name": "Respond",
+      "type": "n8n-nodes-base.respondToWebhook",
+      "typeVersion": 1.1,
+      "position": [1000, 300]
+    }
+  ],
+  "connections": {
+    "Quote Request (Webhook)": { "main": [[{ "node": "Claude — Draft Quote", "type": "main", "index": 0 }]] },
+    "Claude — Draft Quote": { "main": [[{ "node": "Parse Quote", "type": "main", "index": 0 }]] },
+    "Parse Quote": { "main": [[{ "node": "Save Lead → Supabase", "type": "main", "index": 0 }, { "node": "Email Customer", "type": "main", "index": 0 }]] },
+    "Save Lead → Supabase": { "main": [[{ "node": "Respond", "type": "main", "index": 0 }]] },
+    "Email Customer": { "main": [[]] }
+  },
+  "settings": { "executionOrder": "v1" },
+  "pinData": {}
+}
