@@ -1,0 +1,142 @@
+<!doctype html>
+<html lang="en" data-theme="dark">
+<head>
+<meta charset="utf-8" />
+<meta name="viewport" content="width=device-width,initial-scale=1" />
+<title>Blackbeam OS</title>
+<meta name="description" content="Blackbeam OS — the self-running back office for contractors. Instant replies, auto quotes, invoicing, follow-up and scheduling, handled by AI." />
+<meta name="robots" content="noindex,nofollow" />
+<meta name="theme-color" content="#0B0D10" />
+
+<link rel="icon" type="image/png" href="../assets/blackbeam-plate-icon.png" />
+<link rel="apple-touch-icon" href="../assets/blackbeam-avatar.png" />
+
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+<link href="https://fonts.googleapis.com/css2?family=Big+Shoulders+Display:wght@500;600;700;800;900&family=Instrument+Sans:ital,wght@0,400;0,500;0,600;1,400&family=Geist+Mono:wght@400;500;600&display=swap" rel="stylesheet">
+<link rel="stylesheet" href="os.css?v=3">
+</head>
+<body>
+
+<!-- ============ APP SHELL ============ -->
+<div class="app" id="app">
+
+  <!-- ---- SIDEBAR ---- -->
+  <aside class="sidebar" id="sidebar" aria-label="Primary">
+    <div class="side-brand">
+      <a href="../index.html" class="side-logo" aria-label="Blackbeam — marketing site">
+        <img src="../assets/blackbeam-plate-icon.png" alt="" width="600" height="600">
+        <span class="wm">BLACKBEAM<em>OS</em></span>
+      </a>
+      <button class="side-collapse" id="sideCollapse" aria-label="Collapse sidebar" title="Collapse">
+        <svg viewBox="0 0 24 24"><path d="M15 6l-6 6 6 6"/></svg>
+      </button>
+    </div>
+
+    <div class="workspace" id="workspacePill">
+      <span class="ws-badge">BB</span>
+      <div class="ws-meta">
+        <div class="ws-name">Blackbeam LLC</div>
+        <div class="ws-sub">Springfield, MO · Pro plan</div>
+      </div>
+      <svg class="ws-caret" viewBox="0 0 24 24"><path d="M8 9l4 4 4-4"/></svg>
+    </div>
+
+    <nav class="side-nav" aria-label="Sections">
+      <div class="nav-group">
+        <span class="nav-label">Workspace</span>
+        <a class="nav-item" href="#/dashboard" data-route="dashboard">
+          <svg viewBox="0 0 24 24"><rect x="3" y="3" width="7" height="7" rx="1"/><rect x="14" y="3" width="7" height="7" rx="1"/><rect x="3" y="14" width="7" height="7" rx="1"/><rect x="14" y="14" width="7" height="7" rx="1"/></svg>
+          <span>Dashboard</span>
+        </a>
+        <a class="nav-item" href="#/leads" data-route="leads">
+          <svg viewBox="0 0 24 24"><path d="M4 4h16v12H5.2L4 17.2z"/></svg>
+          <span>Leads</span><b class="pill" data-count="leads">3</b>
+        </a>
+        <a class="nav-item" href="#/quotes" data-route="quotes">
+          <svg viewBox="0 0 24 24"><path d="M6 2h9l4 4v16H6z"/><path d="M14 2v5h5"/></svg>
+          <span>Quotes</span>
+        </a>
+        <a class="nav-item" href="#/jobs" data-route="jobs">
+          <svg viewBox="0 0 24 24"><path d="M3 21h18"/><path d="M5 21V9l7-5 7 5v12"/><path d="M9 21v-6h6v6"/></svg>
+          <span>Jobs</span>
+        </a>
+        <a class="nav-item" href="#/invoices" data-route="invoices">
+          <svg viewBox="0 0 24 24"><path d="M6 2h12v20l-3-2-3 2-3-2-3 2z"/><path d="M9 7h6M9 11h6"/></svg>
+          <span>Invoices</span><b class="pill warn" data-count="overdue">1</b>
+        </a>
+        <a class="nav-item" href="#/followups" data-route="followups">
+          <svg viewBox="0 0 24 24"><path d="M18 8a6 6 0 1 0-12 0c0 7-3 9-3 9h18s-3-2-3-9"/><path d="M13.7 21a2 2 0 0 1-3.4 0"/></svg>
+          <span>Follow-ups</span>
+        </a>
+      </div>
+
+      <div class="nav-group">
+        <span class="nav-label">Intelligence</span>
+        <a class="nav-item accent" href="#/automations" data-route="automations">
+          <svg viewBox="0 0 24 24"><path d="M13 2 3 14h7l-1 8 10-12h-7z"/></svg>
+          <span>Automations</span><b class="pill live" data-count="active-automations">4</b>
+        </a>
+      </div>
+
+      <div class="nav-group nav-bottom">
+        <a class="nav-item" href="#/settings" data-route="settings">
+          <svg viewBox="0 0 24 24"><circle cx="12" cy="12" r="3"/><path d="M19.4 15a1.6 1.6 0 0 0 .3 1.8l.1.1a2 2 0 1 1-2.8 2.8l-.1-.1a1.6 1.6 0 0 0-2.7 1.1V21a2 2 0 0 1-4 0v-.1A1.6 1.6 0 0 0 7 19.4a1.6 1.6 0 0 0-1.8.3l-.1.1a2 2 0 1 1-2.8-2.8l.1-.1a1.6 1.6 0 0 0-1.1-2.7H1a2 2 0 0 1 0-4h.1A1.6 1.6 0 0 0 2.6 7a1.6 1.6 0 0 0-.3-1.8l-.1-.1a2 2 0 1 1 2.8-2.8l.1.1A1.6 1.6 0 0 0 7 2.6h.1A1.6 1.6 0 0 0 9 1.1V1a2 2 0 0 1 4 0v.1A1.6 1.6 0 0 0 15 2.6a1.6 1.6 0 0 0 1.8-.3l.1-.1a2 2 0 1 1 2.8 2.8l-.1.1a1.6 1.6 0 0 0-.3 1.8V7a1.6 1.6 0 0 0 1.1 1.5H21a2 2 0 0 1 0 4h-.1a1.6 1.6 0 0 0-1.5 1z"/></svg>
+          <span>Settings</span>
+        </a>
+      </div>
+    </nav>
+  </aside>
+
+  <div class="sidebar-scrim" id="sidebarScrim"></div>
+
+  <!-- ---- MAIN ---- -->
+  <div class="main">
+    <!-- topbar -->
+    <header class="topbar">
+      <button class="icon-btn menu-btn" id="menuBtn" aria-label="Open menu">
+        <svg viewBox="0 0 24 24"><path d="M3 6h18M3 12h18M3 18h18"/></svg>
+      </button>
+      <div class="crumbs"><span id="crumbSection">Dashboard</span></div>
+
+      <div class="search">
+        <svg viewBox="0 0 24 24"><circle cx="11" cy="11" r="7"/><path d="m21 21-4.3-4.3"/></svg>
+        <input type="text" placeholder="Search leads, quotes, invoices…" aria-label="Search" />
+        <kbd>/</kbd>
+      </div>
+
+      <div class="top-actions">
+        <span class="ai-status" id="aiStatus" title="Automation engine status">
+          <span class="dot"></span> AI engine <b>live</b>
+        </span>
+        <button class="icon-btn" id="themeToggle" aria-label="Toggle theme" title="Toggle light / dark">
+          <svg class="i-moon" viewBox="0 0 24 24"><path d="M21 12.8A9 9 0 1 1 11.2 3a7 7 0 0 0 9.8 9.8z"/></svg>
+          <svg class="i-sun" viewBox="0 0 24 24"><circle cx="12" cy="12" r="4.5"/><path d="M12 1v3M12 20v3M4.2 4.2l2.1 2.1M17.7 17.7l2.1 2.1M1 12h3M20 12h3M4.2 19.8l2.1-2.1M17.7 6.3l2.1-2.1"/></svg>
+        </button>
+        <button class="icon-btn" id="bellBtn" aria-label="Notifications">
+          <svg viewBox="0 0 24 24"><path d="M18 8a6 6 0 1 0-12 0c0 7-3 9-3 9h18s-3-2-3-9"/><path d="M13.7 21a2 2 0 0 1-3.4 0"/></svg>
+          <span class="bell-dot"></span>
+        </button>
+        <button class="btn btn-primary new-btn" id="newBtn">
+          <svg viewBox="0 0 24 24"><path d="M12 5v14M5 12h14"/></svg><span>New</span>
+        </button>
+        <div class="avatar" title="Eli D. — Owner">ED</div>
+      </div>
+    </header>
+
+    <!-- routed view -->
+    <main class="view" id="view" tabindex="-1"></main>
+  </div>
+</div>
+
+<!-- toast host -->
+<div class="toast-host" id="toastHost" aria-live="polite"></div>
+
+<!-- command / new menu -->
+<div class="menu-pop" id="newMenu" hidden></div>
+
+<script src="data.js?v=2"></script>
+<script src="automations.js?v=2"></script>
+<script src="app.js?v=2"></script>
+</body>
+</html>
