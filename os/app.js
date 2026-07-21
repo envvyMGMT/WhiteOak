@@ -3,7 +3,9 @@
    Static SPA: hash router, view rendering, theme, automations.
    ============================================================ */
 (function () {
-  const D = window.OS_DATA;
+  let D = window.OS_DATA;
+  const SB = window.BlackbeamSB;
+  let LIVE = false;
   const AE = window.BlackbeamAutomations;
   const $ = (s, r = document) => r.querySelector(s);
   const $$ = (s, r = document) => [...r.querySelectorAll(s)];
@@ -431,8 +433,15 @@
   };
   function openCreate(kind) {
     const c = CREATE[kind]; if (!c) return;
-    openModal({ title: c.title, sub: 'Demo — saved to this session only.', submitLabel: c.submit, body: c.body(),
-      onSubmit: (d) => { const rec = c.save(d); closeModal(); reRender(); if (c.done) c.done(rec); } });
+    openModal({ title: c.title, sub: LIVE ? 'Saved to your live workspace.' : 'Demo — saved to this session only.', submitLabel: c.submit, body: c.body(),
+      onSubmit: async (d) => {
+        let rec;
+        if (LIVE) {
+          try { rec = await SB.create(kind, d); await refreshData(); }
+          catch (e) { toast('Save failed', (e && e.message) || 'Check your connection', ''); return; }
+        } else { rec = c.save(d); }
+        closeModal(); reRender(); if (c.done) c.done(rec);
+      } });
   }
 
   const DETAIL = {
@@ -577,9 +586,9 @@
     if (act === 'set-tab') { $$('.set-nav a').forEach((a) => a.classList.toggle('active', a === t)); toast(t.dataset.tab, 'Section shown (demo).', ''); }
 
     if (act === 'lead-reply') { const l = findRec('lead', t.dataset.id); closeModal(); const res = await AE.run('instant-reply', l || {}); toast('Instant Reply sent', res.summary, 'ok'); }
-    if (act === 'lead-win') { const l = findRec('lead', t.dataset.id); if (l) l.status = 'Won'; closeModal(); reRender(); updateCounts(); toast('Marked won 🎉', (l ? l.name : '') + ' moved to Won', 'ok'); }
-    if (act === 'quote-accept') { const q = findRec('quote', t.dataset.id); if (q) q.status = 'Accepted'; closeModal(); reRender(); toast('Quote accepted', q ? q.id : '', 'ok'); }
-    if (act === 'invoice-paid') { const iv = findRec('invoice', t.dataset.id); if (iv) { iv.status = 'Paid'; iv.chased = false; } closeModal(); reRender(); updateCounts(); toast('Invoice paid', iv ? iv.id + ' · ' + money(iv.amount) : '', 'ok'); }
+    if (act === 'lead-win') { const l = findRec('lead', t.dataset.id); if (l) l.status = 'Won'; if (LIVE) SB.update('leads', t.dataset.id, { status: 'Won' }); closeModal(); reRender(); updateCounts(); toast('Marked won 🎉', (l ? l.name : '') + ' moved to Won', 'ok'); }
+    if (act === 'quote-accept') { const q = findRec('quote', t.dataset.id); if (q) q.status = 'Accepted'; if (LIVE) SB.update('quotes', t.dataset.id, { status: 'Accepted' }); closeModal(); reRender(); toast('Quote accepted', q ? q.id : '', 'ok'); }
+    if (act === 'invoice-paid') { const iv = findRec('invoice', t.dataset.id); if (iv) { iv.status = 'Paid'; iv.chased = false; } if (LIVE) SB.update('invoices', t.dataset.id, { status: 'Paid', chased: false }); closeModal(); reRender(); updateCounts(); toast('Invoice paid', iv ? iv.id + ' · ' + money(iv.amount) : '', 'ok'); }
   });
 
   // selects (filters)
@@ -599,8 +608,8 @@
   });
 
   // account / workspace chrome
-  $('.avatar')?.addEventListener('click', () => toast('Eli D. · Owner', 'Manage your account in Settings.', ''));
-  $('#workspacePill')?.addEventListener('click', () => toast('Blackbeam LLC', 'Workspace switching lands in the full product.', ''));
+  $('.avatar')?.addEventListener('click', () => { LIVE ? doSignOut() : openLogin(); });
+  $('#workspacePill')?.addEventListener('click', () => toast('Blackbeam LLC', LIVE ? 'Multi-workspace lands with team accounts.' : 'Sign in to load your live workspace.', ''));
 
   document.addEventListener('automations:changed', updateCounts);
 
@@ -614,8 +623,44 @@
     });
   }
 
-  // boot
+  // ---- auth + live data ----
+  function updateAccountUI() {
+    const av = $('.avatar');
+    if (av) { av.textContent = LIVE ? 'BB' : 'ED'; av.title = LIVE ? 'Signed in · Blackbeam LLC — click to sign out' : 'Demo mode — click to sign in'; }
+    document.body.classList.toggle('is-live', LIVE);
+  }
+  async function refreshData() {
+    try {
+      if (!SB || !SB.hasStoredToken()) { D = window.OS_DATA; LIVE = false; updateAccountUI(); return; }
+      const s = await SB.session();
+      if (s) { D = await SB.loadAll(window.OS_DATA); LIVE = true; }
+      else { D = window.OS_DATA; LIVE = false; }
+    } catch (e) { D = window.OS_DATA; LIVE = false; }
+    updateAccountUI();
+  }
+  function openLogin() {
+    openModal({
+      title: 'Sign in to Blackbeam OS', sub: 'Live data for your crew — the demo needs no login.',
+      submitLabel: 'Sign in',
+      body: fld('Email', 'email', { type: 'email', required: true, placeholder: 'you@blackbeam.co' })
+        + fld('Password', 'password', { type: 'password', required: true, placeholder: '••••••••' })
+        + '<label style="display:flex;align-items:center;gap:8px;font-size:13px;color:var(--muted);cursor:pointer"><input type="checkbox" id="signupMode" style="width:auto;margin:0"> Create an account instead</label>',
+      onSubmit: async (d) => {
+        const signup = $('#signupMode') && $('#signupMode').checked;
+        try {
+          const r = signup ? await SB.signUp(d.email, d.password) : await SB.signIn(d.email, d.password);
+          if (r.error) { toast('Sign-in failed', r.error.message, ''); return; }
+          if (signup && !r.data.session) { closeModal(); toast('Almost there', 'Check your email to confirm, then sign in.', 'ok'); return; }
+          closeModal(); await refreshData(); reRender(); updateCounts(); toast('Signed in', 'Your live workspace is loaded.', 'ok');
+        } catch (e) { toast('Sign-in error', (e && e.message) || 'Try again', ''); }
+      },
+    });
+  }
+  async function doSignOut() { try { await SB.signOut(); } catch (e) {} await refreshData(); reRender(); updateCounts(); toast('Signed out', 'Back to demo mode.', ''); }
+
+  // boot — render demo instantly, then upgrade to live data if signed in
   window.addEventListener('hashchange', route);
   updateCounts();
   route();
+  (async () => { await refreshData(); if (LIVE) { updateCounts(); route(); } })();
 })();
