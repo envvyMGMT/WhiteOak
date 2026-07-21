@@ -25,6 +25,9 @@
 <meta name="twitter:title" content="Blackbeam | Construction &amp; Remodeling in Springfield, MO" />
 <meta name="twitter:description" content="A licensed, insured Springfield construction crew with same-day quotes and five-minute replies." />
 <meta name="twitter:image" content="https://blackbeam.co/og-image.jpg" />
+<meta name="geo.region" content="US-MO" />
+<meta name="geo.placename" content="Springfield, Missouri" />
+<meta property="og:locale" content="en_US" />
 <meta name="theme-color" content="#FF5A1E" />
 
 <link rel="icon" href="data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 100 100'%3E%3Crect width='100' height='100' rx='16' fill='%230B0D10'/%3E%3Crect x='14' y='22' width='72' height='56' rx='8' fill='none' stroke='%23FF5A1E' stroke-width='4'/%3E%3Ctext x='50' y='58' font-family='Arial Black,sans-serif' font-size='34' font-weight='900' fill='%23fff' text-anchor='middle'%3EBB%3C/text%3E%3Crect x='34' y='64' width='32' height='4' fill='%23FF5A1E'/%3E%3C/svg%3E" />
@@ -140,6 +143,22 @@
 
 <!-- ============ HERO ============ -->
 <section class="hero" aria-label="Intro">
+  <!-- ============================================================
+       BORDER-TO-BORDER AUTOPLAY TRAILER
+       Placeholder = a construction timelapse ("26 months in 9 minutes").
+       Swap the two VIDEO_IDs below for your own trailer when it's ready
+       (use the SAME id in both the src and the &playlist= for looping).
+       Autoplay requires mute=1 — the sound button (bottom-right) opens the
+       full trailer with audio. A self-hosted <video> is fine too:
+       <video autoplay muted loop playsinline><source src="trailer.mp4"></video>
+       ============================================================ -->
+  <div class="hero-video">
+    <iframe
+      src="https://www.youtube-nocookie.com/embed/ABvUTcVqfMY?autoplay=1&mute=1&loop=1&playlist=ABvUTcVqfMY&controls=0&showinfo=0&rel=0&modestbranding=1&iv_load_policy=3&playsinline=1&disablekb=1"
+      title="Construction timelapse" allow="autoplay; encrypted-media" frameborder="0" tabindex="-1" aria-hidden="true"></iframe>
+  </div>
+  <div class="hero-scrim"></div>
+
   <div class="hero-inner">
     <div class="hero-eyebrow">
       <span class="eyebrow">Springfield, MO &amp; surrounding</span>
@@ -150,7 +169,7 @@
     <p class="hero-sub">Blackbeam is a Springfield general contractor that builds like a company ten times its size: same-day quotes, five-minute replies, and a job that stays on schedule.</p>
     <div class="hero-actions">
       <a href="#contact" class="btn btn-primary btn-lg">Get a Free Quote</a>
-      <a href="tel:+14175550100" class="btn btn-outline btn-lg">Call (417) 555-0100</a>
+      <a href="tel:+14175550100" class="btn btn-ghost-light btn-lg">Call (417) 555-0100</a>
     </div>
     <div class="hero-chips">
       <span class="chip"><svg viewBox="0 0 24 24"><path d="M20 6 9 17l-5-5"/></svg>Same-Day Quotes</span>
@@ -158,19 +177,12 @@
       <span class="chip"><svg viewBox="0 0 24 24"><path d="M12 22s8-4 8-10V5l-8-3-8 3v7c0 6 8 10 8 10Z"/></svg>Licensed &amp; Insured</span>
     </div>
   </div>
-  <!-- Border-to-border trailer -->
-  <div class="hero-trailer">
-    <div class="trailer-frame" data-trailer role="button" tabindex="0" aria-label="Play the Blackbeam trailer">
-      <!-- TRAILER background — drop in and it plays here:
-           <video autoplay muted loop playsinline poster="hero-poster.jpg"><source src="trailer.mp4" type="video/mp4"></video> -->
-      <div class="trailer-poster"><div class="grid"></div></div>
-      <div class="trailer-play">
-        <div class="tp-badge-outer"><span class="tp-ring"></span><span class="tp-badge"><svg viewBox="0 0 24 24" aria-hidden="true"><path d="M8 5v14l11-7z"/></svg></span></div>
-        <div class="tp-label">Watch the 60-second trailer</div>
-      </div>
-    </div>
-  </div>
-  <div style="height:clamp(40px,6vh,64px)"></div>
+
+  <button class="hero-sound" data-trailer aria-label="Watch the trailer with sound">
+    <svg viewBox="0 0 24 24" aria-hidden="true"><path d="M8 5v14l11-7z"/></svg>
+    Watch with sound
+  </button>
+  <div class="scroll-hint" aria-hidden="true"><span>Scroll</span><span class="bar"></span></div>
 </section>
 
 <!-- ============ TICKER ============ -->
@@ -476,15 +488,13 @@
 <div class="modal" id="trailerModal" role="dialog" aria-modal="true" aria-label="Blackbeam trailer">
   <div class="modal-inner">
     <button class="modal-close" id="modalClose" aria-label="Close"><svg viewBox="0 0 24 24"><path d="M6 6l12 12M18 6L6 18"/></svg>Close</button>
-    <div class="modal-frame" id="modalFrame">
-      <!-- ADD YOUR TRAILER HERE:
-           Local file:  <video controls autoplay><source src="trailer.mp4" type="video/mp4"></video>
-           YouTube:     <iframe src="https://www.youtube.com/embed/VIDEO_ID?autoplay=1" allow="autoplay; fullscreen"></iframe>
-           Vimeo:       <iframe src="https://player.vimeo.com/video/VIDEO_ID?autoplay=1" allow="autoplay; fullscreen"></iframe> -->
+    <!-- The full trailer with sound + controls. Uses the same placeholder
+         construction video as the hero — swap the id for your own trailer. -->
+    <div class="modal-frame" id="modalFrame"
+         data-embed="https://www.youtube-nocookie.com/embed/ABvUTcVqfMY?autoplay=1&rel=0&modestbranding=1&playsinline=1">
       <div class="modal-placeholder">
         <div class="mp-icon"><svg viewBox="0 0 24 24"><path d="M8 5v14l11-7z"/></svg></div>
-        <h3>Trailer goes here</h3>
-        <p>Drop your video into <code>#modalFrame</code> in <code>index.html</code> — a local <code>&lt;video&gt;</code> tag or a YouTube / Vimeo <code>&lt;iframe&gt;</code>.</p>
+        <h3>Loading trailer…</h3>
       </div>
     </div>
   </div>

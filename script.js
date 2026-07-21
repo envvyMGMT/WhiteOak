@@ -17,7 +17,12 @@
   if(modal){
     var closeBtn=document.getElementById('modalClose'),frame=document.getElementById('modalFrame');
     var originalFrame=frame.innerHTML;
-    function openModal(){modal.classList.add('open');document.body.classList.add('no-scroll');}
+    var embed=frame.getAttribute('data-embed');
+    function openModal(){
+      modal.classList.add('open');document.body.classList.add('no-scroll');
+      // Inject the player with sound + controls on open (kept out of the DOM until needed)
+      if(embed){frame.innerHTML='<iframe src="'+embed+'" title="Blackbeam trailer" allow="autoplay; encrypted-media; fullscreen" allowfullscreen frameborder="0"></iframe>';}
+    }
     function closeModal(){modal.classList.remove('open');document.body.classList.remove('no-scroll');frame.innerHTML=originalFrame;}
     document.querySelectorAll('[data-trailer]').forEach(function(b){b.addEventListener('click',openModal);});
     closeBtn.addEventListener('click',closeModal);

@@ -93,45 +93,41 @@ section.block{padding:clamp(64px,9vh,110px) 0;position:relative}
 .bg-fog{background:var(--fog)}
 .bg-fog2{background:var(--fog-2)}
 
-/* HERO (light, border-to-border trailer) */
-.hero{position:relative;overflow:hidden;background:
-  radial-gradient(120% 80% at 85% -10%, rgba(255,90,30,.08) 0%, transparent 45%),
-  linear-gradient(180deg,var(--paper) 0%,var(--fog-2) 100%)}
-.hero::before{content:"";position:absolute;inset:0;opacity:.6;pointer-events:none;
-  background-image:linear-gradient(var(--line) 1px,transparent 1px),linear-gradient(90deg,var(--line) 1px,transparent 1px);
-  background-size:60px 60px;
-  -webkit-mask-image:radial-gradient(120% 90% at 50% 0%,#000 20%,transparent 70%);mask-image:radial-gradient(120% 90% at 50% 0%,#000 20%,transparent 70%)}
-.hero-inner{position:relative;z-index:1;max-width:var(--maxw);margin:0 auto;padding:clamp(56px,9vh,104px) 28px clamp(40px,6vh,64px);text-align:center}
-.hero-eyebrow{display:inline-flex;align-items:center;gap:12px;flex-wrap:wrap;margin-bottom:22px;justify-content:center}
+/* HERO — full-bleed, border-to-border autoplaying video */
+.hero{position:relative;min-height:100svh;display:flex;flex-direction:column;justify-content:flex-end;overflow:hidden;background:#0B0D10}
+.hero-video{position:absolute;inset:0;z-index:0;overflow:hidden;pointer-events:none;background:
+  radial-gradient(120% 100% at 75% 5%, rgba(255,90,30,.18) 0%, transparent 45%),
+  linear-gradient(180deg,#14171C 0%,#0B0D10 75%)}
+/* Scale a 16:9 iframe so it always covers the viewport (no letterboxing) */
+.hero-video iframe{position:absolute;top:50%;left:50%;transform:translate(-50%,-50%);
+  width:100vw;height:56.25vw;min-height:100%;min-width:177.78svh;border:0;pointer-events:none}
+.hero-scrim{position:absolute;inset:0;z-index:1;pointer-events:none;background:
+  linear-gradient(180deg,rgba(11,13,16,.55) 0%,rgba(11,13,16,.2) 32%,rgba(11,13,16,.72) 78%,#0B0D10 100%)}
+.hero-inner{position:relative;z-index:2;max-width:var(--maxw);margin:0 auto;width:100%;
+  padding:clamp(96px,16vh,140px) 28px clamp(46px,8vh,80px);text-align:left}
+.hero-eyebrow{display:flex;align-items:center;gap:12px;flex-wrap:wrap;margin-bottom:22px}
 .hero-eyebrow .dot{width:6px;height:6px;background:var(--hivis);border-radius:50%;flex:none}
-.hero h1{font-size:clamp(40px,7.4vw,92px);color:var(--ink);max-width:16ch;margin:0 auto}
-.hero h1 em{font-style:normal;color:var(--hivis-ink)}
-.hero-sub{margin:24px auto 0;max-width:60ch;font-size:clamp(16px,1.7vw,20px);line-height:1.55;color:var(--steel)}
-.hero-actions{margin-top:32px;display:flex;gap:14px;flex-wrap:wrap;justify-content:center}
-.hero-chips{margin-top:30px;display:flex;gap:10px;flex-wrap:wrap;justify-content:center}
-.chip{font-family:'Geist Mono',monospace;font-size:11px;letter-spacing:.08em;text-transform:uppercase;color:var(--steel);
-  border:1px solid var(--line-2);border-radius:999px;padding:8px 14px;display:inline-flex;align-items:center;gap:8px;background:var(--paper)}
-.chip svg{width:13px;height:13px;stroke:var(--hivis-ink);fill:none;stroke-width:2}
-/* trailer frame */
-.hero-trailer{position:relative;z-index:1;max-width:1320px;margin:0 auto;padding:0 28px}
-.trailer-frame{position:relative;width:100%;aspect-ratio:16/9;max-height:70vh;border-radius:10px;overflow:hidden;
-  border:1px solid var(--line-2);box-shadow:var(--shadow-lg);background:#0B0D10;cursor:pointer}
-.trailer-frame video,.trailer-frame iframe{position:absolute;inset:0;width:100%;height:100%;object-fit:cover;border:0}
-.trailer-poster{position:absolute;inset:0;display:flex;align-items:center;justify-content:center;
-  background:radial-gradient(120% 100% at 70% 10%,rgba(255,90,30,.22) 0%,transparent 45%),linear-gradient(180deg,#14171C,#0B0D10)}
-.trailer-poster .grid{position:absolute;inset:0;opacity:.5;
-  background-image:linear-gradient(rgba(139,148,161,.14) 1px,transparent 1px),linear-gradient(90deg,rgba(139,148,161,.14) 1px,transparent 1px);
-  background-size:52px 52px;-webkit-mask-image:radial-gradient(80% 80% at 50% 50%,#000,transparent);mask-image:radial-gradient(80% 80% at 50% 50%,#000,transparent)}
-.trailer-play{position:relative;z-index:1;text-align:center}
-.tp-badge{width:84px;height:84px;border-radius:50%;margin:0 auto 16px;display:flex;align-items:center;justify-content:center;
-  border:1px solid rgba(255,255,255,.35);background:rgba(11,13,16,.35);backdrop-filter:blur(4px);transition:transform .2s,background .2s,border-color .2s}
-.trailer-frame:hover .tp-badge{transform:scale(1.06);background:var(--hivis);border-color:var(--hivis)}
-.tp-badge svg{width:26px;height:26px;margin-left:4px;fill:#fff}
-.tp-label{font-family:'Geist Mono',monospace;font-size:11px;letter-spacing:.2em;text-transform:uppercase;color:rgba(237,240,243,.7)}
-.tp-ring{position:absolute;inset:0;border-radius:50%;border:1px solid rgba(255,90,30,.6);animation:pulse 2.6s ease-out infinite}
+.hero .eyebrow{color:#C7CDD4}
+.hero h1{font-size:clamp(40px,7.4vw,92px);color:#fff;max-width:16ch;margin:0}
+.hero h1 em{font-style:normal;color:var(--hivis)}
+.hero-sub{margin:24px 0 0;max-width:52ch;font-size:clamp(16px,1.7vw,20px);line-height:1.55;color:#C7CDD4}
+.hero-actions{margin-top:32px;display:flex;gap:14px;flex-wrap:wrap}
+.hero-chips{margin-top:30px;display:flex;gap:10px;flex-wrap:wrap}
+.chip{font-family:'Geist Mono',monospace;font-size:11px;letter-spacing:.08em;text-transform:uppercase;color:#C7CDD4;
+  border:1px solid rgba(255,255,255,.22);border-radius:999px;padding:8px 14px;display:inline-flex;align-items:center;gap:8px;background:rgba(11,13,16,.35);backdrop-filter:blur(4px)}
+.chip svg{width:13px;height:13px;stroke:var(--hivis);fill:none;stroke-width:2}
+/* sound / trailer control */
+.hero-sound{position:absolute;right:28px;bottom:clamp(46px,8vh,80px);z-index:2;display:inline-flex;align-items:center;gap:9px;
+  padding:11px 16px;border-radius:999px;background:rgba(11,13,16,.45);border:1px solid rgba(255,255,255,.25);backdrop-filter:blur(6px);
+  font-family:'Geist Mono',monospace;font-size:11px;letter-spacing:.12em;text-transform:uppercase;color:#EDF0F3;transition:background .2s,border-color .2s}
+.hero-sound:hover{background:var(--hivis);border-color:var(--hivis)}
+.hero-sound svg{width:15px;height:15px;fill:#fff}
+.scroll-hint{position:absolute;left:50%;bottom:16px;transform:translateX(-50%);z-index:2;display:flex;flex-direction:column;align-items:center;gap:7px;
+  font-family:'Geist Mono',monospace;font-size:10px;letter-spacing:.28em;text-transform:uppercase;color:rgba(237,240,243,.55)}
+.scroll-hint .bar{width:1px;height:32px;background:linear-gradient(rgba(237,240,243,.6),transparent);animation:drop 2s ease-in-out infinite}
+@keyframes drop{0%,100%{opacity:.3;transform:scaleY(.6)}50%{opacity:1;transform:scaleY(1)}}
 @keyframes pulse{0%{transform:scale(1);opacity:.7}100%{transform:scale(1.7);opacity:0}}
-.tp-badge-outer{position:relative;width:84px;height:84px;margin:0 auto 16px}
-.tp-badge-outer .tp-badge{margin:0}
+@media (max-width:600px){.hero-sound{display:none}}
 
 /* TICKER */
 .ticker{border-top:1px solid var(--line);border-bottom:1px solid var(--line);background:var(--ink);overflow:hidden;white-space:nowrap}
