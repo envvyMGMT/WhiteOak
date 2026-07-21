@@ -73,6 +73,7 @@ p{margin:0}
 .nav-inner{max-width:var(--maxw);margin:0 auto;padding:14px 28px;display:flex;align-items:center;justify-content:space-between;gap:20px}
 .brand{display:flex;align-items:center;gap:12px}
 .brand .mark{width:40px;height:32px;flex:none}
+.brand .logo-tile{width:auto;height:38px;object-fit:contain;flex:none}
 .brand .word{font-family:'Big Shoulders Display',sans-serif;font-weight:800;font-size:22px;letter-spacing:.04em;color:var(--ink);line-height:1}
 .nav-links{display:flex;align-items:center;gap:30px}
 .nav-links a{font-family:'Geist Mono',monospace;font-size:12.5px;letter-spacing:.08em;text-transform:uppercase;color:var(--steel);transition:color .2s}
@@ -287,6 +288,7 @@ form.sent .form-body{display:none}
 .foot-top{display:flex;justify-content:space-between;gap:40px;flex-wrap:wrap;align-items:flex-start}
 .foot-brand{display:flex;align-items:center;gap:14px;margin-bottom:18px}
 .foot-brand .mark{width:46px;height:37px}
+.foot-brand .foot-logo{width:auto;height:46px;object-fit:contain;flex:none}
 .foot-brand .word{font-family:'Big Shoulders Display',sans-serif;font-weight:800;font-size:26px;letter-spacing:.04em;color:#fff}
 .footer .desc{color:var(--steel-2);font-size:14.5px;line-height:1.6;max-width:34ch}
 .foot-cols{display:flex;gap:56px;flex-wrap:wrap}
@@ -333,6 +335,12 @@ form.sent .form-body{display:none}
 .mark-stage{aspect-ratio:4/3;display:flex;align-items:center;justify-content:center;border:1px solid var(--line);border-radius:12px;background:radial-gradient(120% 120% at 30% 20%,#181C22,#0B0D10);position:relative;overflow:hidden;box-shadow:var(--shadow-lg)}
 .mark-stage::after{content:"";position:absolute;inset:0;background-image:linear-gradient(rgba(139,148,161,.12) 1px,transparent 1px),linear-gradient(90deg,rgba(139,148,161,.12) 1px,transparent 1px);background-size:40px 40px}
 .mark-stage svg{width:70%;position:relative;z-index:1;filter:drop-shadow(0 24px 40px rgba(0,0,0,.5))}
+.mark-stage .stage-img{width:84%;height:auto;position:relative;z-index:1}
+.mark-stage.light{background:var(--fog)}
+.mark-stage.light::after{display:none}
+.mark-stage.light .stage-img{width:78%}
+/* the mark — showcase nameplate on fog */
+.mark-showcase{display:block;width:100%;max-width:540px;height:auto;margin:34px 0 6px}
 /* values */
 .values-grid{display:grid;grid-template-columns:repeat(3,1fr);gap:20px;margin-top:44px}
 .value{border:1px solid var(--line);border-radius:8px;padding:32px 28px;background:var(--paper);box-shadow:var(--shadow)}
