@@ -132,7 +132,12 @@
   };
 
   V.leads = () => {
-    const rows = D.leads.map((l) => `<tr data-lead="${l.id}">
+    const f = state.leadFilter;
+    let list = D.leads.slice();
+    if (f.status !== 'all') list = list.filter((l) => l.status === f.status);
+    if (f.source !== 'all') list = list.filter((l) => l.source === f.source);
+    if (f.q) { const q = f.q.toLowerCase(); list = list.filter((l) => (l.name + ' ' + l.job + ' ' + l.loc).toLowerCase().includes(q)); }
+    const rows = list.map((l) => `<tr data-action="open" data-kind="lead" data-id="${l.id}">
       <td><div class="cell-name"><span class="mini-av">${l.initials}</span>
         <div><div class="strong">${l.name}</div><div class="muted" style="font-size:12px">${l.job}</div></div></div></td>
       <td><span class="src">${svg(SRC_IC[l.source] || 'inbox')} ${l.source}</span></td>
@@ -141,16 +146,20 @@
       <td>${l.ai ? `<span class="chip-ai">${fill('bolt')} ${l.ai}</span>` : '<span class="muted">—</span>'}</td>
       <td class="tnum strong">${money(l.value)}</td>
       <td>${badge(l.status, LEAD_ST[l.status])}</td>
-    </tr>`).join('');
+    </tr>`).join('') || `<tr><td colspan="7"><div class="empty" style="padding:38px 20px">${svg('inbox')}<h3>No leads match</h3><p>Try a different filter.</p></div></td></tr>`;
     const nNew = D.leads.filter((l) => l.status === 'New').length;
+    const tab = (label, val, n) => `<button class="tab ${f.status === val ? 'active' : ''}" data-action="filter-lead" data-status="${val}">${label}${n != null ? ` <b>${n}</b>` : ''}</button>`;
     return `
       <div class="page-head"><div><h1>Leads</h1><div class="sub">Every inquiry, auto-answered the moment it lands.</div></div>
         <div class="head-actions"><button class="btn btn-ghost btn-sm" data-action="sim-lead">${svg('sparkle')} Simulate new lead</button>
-        <button class="btn btn-primary btn-sm">${svg('plus')} Add lead</button></div></div>
+        <button class="btn btn-primary btn-sm" data-action="new" data-kind="lead">${svg('plus')} Add lead</button></div></div>
       <div class="toolbar">
-        <div class="tabs"><span class="tab active">All <b>${D.leads.length}</b></span><span class="tab">New <b>${nNew}</b></span><span class="tab">Quoted</span><span class="tab">Won</span></div>
+        <div class="tabs">${tab('All', 'all', D.leads.length)}${tab('New', 'New', nNew)}${tab('Quoted', 'Quoted')}${tab('Won', 'Won')}</div>
         <div class="spacer"></div>
-        <select class="select"><option>All sources</option><option>Website form</option><option>Google</option><option>Referral</option></select>
+        <select class="select" data-action="filter-source">
+          <option value="all">All sources</option>
+          ${['Website form', 'Google', 'Referral', 'Facebook'].map((s) => `<option${f.source === s ? ' selected' : ''}>${s}</option>`).join('')}
+        </select>
       </div>
       <div class="card"><div class="card-b flush"><table class="tbl">
         <thead><tr><th>Lead</th><th>Source</th><th>Location</th><th>Received</th><th>AI reply</th><th>Est. value</th><th>Status</th></tr></thead>
@@ -158,7 +167,7 @@
   };
 
   V.quotes = () => {
-    const rows = D.quotes.map((q) => `<tr>
+    const rows = D.quotes.map((q) => `<tr data-action="open" data-kind="quote" data-id="${q.id}">
       <td class="tnum strong">${q.id}</td>
       <td><div class="strong">${q.client}</div><div class="muted" style="font-size:12px">${q.job}</div></td>
       <td class="tnum strong">${money(q.amount)}</td>
@@ -170,7 +179,8 @@
     const outstanding = D.quotes.filter((q) => ['Sent', 'Viewed'].includes(q.status)).reduce((a, b) => a + b.amount, 0);
     return `
       <div class="page-head"><div><h1>Quotes</h1><div class="sub">Drafted by AI, approved by you, sent in minutes.</div></div>
-        <div class="head-actions"><button class="btn btn-primary btn-sm" data-action="ai-quote">${fill('bolt')} Generate with AI</button></div></div>
+        <div class="head-actions"><button class="btn btn-ghost btn-sm" data-action="new" data-kind="quote">${svg('plus')} New quote</button>
+        <button class="btn btn-primary btn-sm" data-action="ai-quote">${fill('bolt')} Generate with AI</button></div></div>
       <div class="grid cols-3" style="margin-bottom:16px">
         <div class="card stat"><div class="k">${svg('check')} Accepted (30d)</div><div class="v">${money(accepted)}</div></div>
         <div class="card stat"><div class="k">${svg('doc')} Out for signature</div><div class="v">${money(outstanding)}</div></div>
@@ -183,7 +193,7 @@
 
   V.jobs = () => {
     const cols = Object.entries(D.jobs).map(([name, arr]) => {
-      const cards = arr.map((j) => `<div class="job-card">
+      const cards = arr.map((j) => `<div class="job-card" data-action="open" data-kind="job" data-id="${j.id}">
         <div class="jt">${j.title}</div>
         <div class="jm">${svg('tag')} ${j.tag} · ${money(j.value)}</div>
         ${j.progress ? `<div class="bar-wrap" style="margin-top:10px"><div class="bar-fill" style="width:${j.progress}%"></div></div>` : ''}
@@ -194,13 +204,13 @@
     }).join('');
     return `
       <div class="page-head"><div><h1>Jobs</h1><div class="sub">Crew and jobs, always in sync.</div></div>
-        <div class="head-actions"><button class="btn btn-ghost btn-sm">${svg('calendar')} Calendar</button>
-        <button class="btn btn-primary btn-sm">${svg('plus')} New job</button></div></div>
+        <div class="head-actions"><button class="btn btn-ghost btn-sm" data-action="soon" data-label="Calendar view">${svg('calendar')} Calendar</button>
+        <button class="btn btn-primary btn-sm" data-action="new" data-kind="job">${svg('plus')} New job</button></div></div>
       <div class="board">${cols}</div>`;
   };
 
   V.invoices = () => {
-    const rows = D.invoices.map((i) => `<tr>
+    const rows = D.invoices.map((i) => `<tr data-action="open" data-kind="invoice" data-id="${i.id}">
       <td class="tnum strong">${i.id}</td>
       <td><div class="strong">${i.client}</div><div class="muted" style="font-size:12px">${i.job}</div></td>
       <td class="tnum strong">${money(i.amount)}</td>
@@ -213,7 +223,7 @@
     const over = D.invoices.filter((i) => i.status === 'Overdue').reduce((a, b) => a + b.amount, 0);
     return `
       <div class="page-head"><div><h1>Invoices</h1><div class="sub">Sent on milestones, chased automatically.</div></div>
-        <div class="head-actions"><button class="btn btn-primary btn-sm">${svg('plus')} New invoice</button></div></div>
+        <div class="head-actions"><button class="btn btn-primary btn-sm" data-action="new" data-kind="invoice">${svg('plus')} New invoice</button></div></div>
       <div class="grid cols-3" style="margin-bottom:16px">
         <div class="card stat"><div class="k">${svg('check')} Paid (30d)</div><div class="v">${money(paid)}</div></div>
         <div class="card stat"><div class="k">${svg('clock')} Outstanding</div><div class="v">${money(due)}</div></div>
@@ -234,8 +244,8 @@
         <div class="feed-time">${f.when}</div></div></div>`).join('');
     return `
       <div class="page-head"><div><h1>Follow-ups</h1><div class="sub">The gentle, persistent nudge that closes quiet leads — on autopilot.</div></div>
-        <div class="head-actions"><button class="btn btn-ghost btn-sm">${svg('repeat')} Sequences</button>
-        <button class="btn btn-primary btn-sm">${svg('plus')} New sequence</button></div></div>
+        <div class="head-actions"><button class="btn btn-ghost btn-sm" data-action="soon" data-label="Sequence editor">${svg('repeat')} Sequences</button>
+        <button class="btn btn-primary btn-sm" data-action="new" data-kind="sequence">${svg('plus')} New sequence</button></div></div>
       <div class="list-split">
         <div class="card"><div class="card-h"><h3>Queued (${D.followups.length})</h3>
           <span class="chip-ai">${fill('bolt')} ${D.followups.filter((f) => f.auto).length} automated</span></div>
@@ -306,16 +316,16 @@
       ['google', 'Google Business', 'Auto review requests', false],
       ['key', 'Automation API', 'Connect the Blackbeam AI engine', true],
     ];
-    const rows = integ.map(([ic, n, d, on]) => `<div class="integration">
+    const rows = integ.map(([ic, n, d, on]) => `<div class="integration" data-integration="${n}">
       <div class="glyph">${svg(ic)}</div>
       <div class="it"><div class="n">${n}</div><div class="d">${d}</div></div>
-      ${on ? badge('Connected', 'ok') : `<button class="btn btn-ghost btn-sm">${svg('link')} Connect</button>`}
+      ${on ? badge('Connected', 'ok') : `<button class="btn btn-ghost btn-sm" data-action="connect" data-name="${n}">${svg('link')} Connect</button>`}
     </div>`).join('');
     return `
       <div class="page-head"><div><h1>Settings</h1><div class="sub">Your workspace, brand, team and connections.</div></div></div>
       <div class="settings-grid">
         <nav class="set-nav">
-          <a class="active">Company</a><a>Branding</a><a>Team</a><a>Integrations</a><a>Automation keys</a><a>Billing</a>
+          ${['Company', 'Branding', 'Team', 'Integrations', 'Automation keys', 'Billing'].map((s, i) => `<a class="${i === 0 ? 'active' : ''}" data-action="set-tab" data-tab="${s}">${s}</a>`).join('')}
         </nav>
         <div>
           <div class="card" style="margin-bottom:16px"><div class="card-h"><h3>Company profile</h3></div><div class="card-b">
@@ -329,7 +339,7 @@
             </div>
             <div class="field"><label>AI voice & tone</label>
               <textarea>Friendly, plain-spoken, no jargon — the way a crew lead would talk. Confident, fast, never pushy.</textarea></div>
-            <button class="btn btn-primary btn-sm">${svg('check')} Save changes</button>
+            <button class="btn btn-primary btn-sm" data-action="save-settings">${svg('check')} Save changes</button>
           </div></div>
           <div class="card"><div class="card-h"><h3>Integrations</h3>
             <span class="muted mono" style="font-size:11px">${integ.filter((i) => i[3]).length}/${integ.length} connected</span></div>
@@ -337,6 +347,118 @@
         </div>
       </div>`;
   };
+
+  /* ============================================================ MODALS / CREATE / DETAIL */
+  const state = { leadFilter: { status: 'all', source: 'all', q: '' } };
+  const reRender = () => route();
+  const initials = (n) => ((n || '').trim().split(/\s+/).map((w) => w[0] || '').join('').slice(0, 2).toUpperCase()) || 'NN';
+
+  function closeModal() { const m = $('#modalRoot'); if (m) m.remove(); }
+  function openModal(opts) {
+    closeModal();
+    const root = document.createElement('div');
+    root.id = 'modalRoot'; root.className = 'modal-overlay';
+    const footer = opts.onSubmit
+      ? `<div class="modal-f"><button type="button" class="btn btn-ghost btn-sm" data-close>Cancel</button>
+         <button type="submit" form="modalForm" class="btn btn-primary btn-sm">${opts.submitLabel || 'Save'}</button></div>`
+      : `<div class="modal-f"><button type="button" class="btn btn-ghost btn-sm" data-close>Close</button>${opts.actions || ''}</div>`;
+    root.innerHTML = `<div class="modal" role="dialog" aria-modal="true">
+      <div class="modal-h"><div><h3>${opts.title}</h3>${opts.sub ? `<div class="modal-sub">${opts.sub}</div>` : ''}</div>
+        <button class="modal-x" data-close aria-label="Close">&times;</button></div>
+      <form class="modal-b" id="modalForm">${opts.body}</form>${footer}</div>`;
+    document.body.appendChild(root);
+    root.addEventListener('click', (e) => { if (e.target === root || e.target.closest('[data-close]')) closeModal(); });
+    const form = $('#modalForm', root);
+    if (opts.onSubmit) form.addEventListener('submit', (e) => {
+      e.preventDefault();
+      const data = {}; new FormData(form).forEach((v, k) => (data[k] = v));
+      opts.onSubmit(data);
+    });
+    const first = form.querySelector('input,select,textarea'); if (first) setTimeout(() => first.focus(), 40);
+  }
+  function fld(label, name, o) {
+    o = o || {};
+    const req = o.required ? ' required' : '';
+    const star = o.required ? ' <span style="color:var(--hivis)">*</span>' : '';
+    let ctrl;
+    if (o.options) ctrl = `<select class="select" name="${name}" style="width:100%"${req}>${o.options.map((op) => `<option${op === o.value ? ' selected' : ''}>${op}</option>`).join('')}</select>`;
+    else if (o.type === 'textarea') ctrl = `<textarea name="${name}" placeholder="${o.placeholder || ''}"${req}>${o.value || ''}</textarea>`;
+    else ctrl = `<input class="input" style="width:100%" type="${o.type || 'text'}" name="${name}" placeholder="${o.placeholder || ''}" value="${o.value || ''}"${req}>`;
+    return `<div class="field"><label>${label}${star}</label>${ctrl}</div>`;
+  }
+  const two = (a, b) => `<div class="grid cols-2" style="gap:0 14px">${a}${b}</div>`;
+
+  const CREATE = {
+    lead: {
+      title: 'New lead', submit: 'Add lead',
+      body: () => fld('Name', 'name', { required: true, placeholder: 'Client name' })
+        + two(fld('Phone', 'phone', { type: 'tel', placeholder: '(417) 000-0000' }), fld('Est. value ($)', 'value', { type: 'number', placeholder: '12000' }))
+        + fld('Job', 'job', { placeholder: 'e.g. Kitchen remodel' })
+        + two(fld('Source', 'source', { options: ['Website form', 'Google', 'Referral', 'Facebook'] }), fld('Location', 'loc', { options: ['Springfield', 'Nixa', 'Ozark', 'Republic', 'Battlefield'] })),
+      save: (d) => { const l = { id: 'L-' + (2052 + D.leads.length), name: d.name, initials: initials(d.name), job: d.job || '—', source: d.source, loc: d.loc, received: 'Just now', status: 'New', ai: '0:' + (35 + Math.floor(Math.random() * 20)), value: +d.value || 0 }; D.leads.unshift(l); return l; },
+      done: (l) => toast('Lead added', l.name + ' · ' + l.job, 'ok'),
+    },
+    quote: {
+      title: 'New quote', submit: 'Create quote',
+      body: () => fld('Client', 'client', { required: true }) + fld('Job', 'job', { placeholder: 'Scope of work' })
+        + two(fld('Amount ($)', 'amount', { type: 'number', required: true }), fld('Status', 'status', { options: ['Draft', 'Sent'] })),
+      save: (d) => { const q = { id: '#Q-' + (1043 + D.quotes.length), client: d.client, job: d.job || '—', amount: +d.amount || 0, status: d.status || 'Draft', ai: false, date: 'Today', viewed: false }; D.quotes.unshift(q); return q; },
+      done: (q) => toast('Quote created', q.id + ' · ' + money(q.amount), 'ok'),
+    },
+    job: {
+      title: 'New job', submit: 'Create job',
+      body: () => fld('Job title', 'title', { required: true })
+        + two(fld('Client', 'client'), fld('Value ($)', 'value', { type: 'number' }))
+        + two(fld('Type', 'tag', { options: ['Remodel', 'Addition', 'Concrete', 'Roofing', 'Exterior', 'Framing'] }), fld('Stage', 'stage', { options: ['Scheduled', 'In progress', 'Blocked', 'Done'] })),
+      save: (d) => { const j = { id: 'J-' + (319 + Object.values(D.jobs).flat().length), title: d.title, client: d.client || '—', when: 'Just added', crew: ['JR'], value: +d.value || 0, tag: d.tag }; (D.jobs[d.stage] || D.jobs.Scheduled).unshift(j); return j; },
+      done: (j) => toast('Job created', j.title, 'ok'),
+    },
+    invoice: {
+      title: 'New invoice', submit: 'Create invoice',
+      body: () => two(fld('Client', 'client', { required: true }), fld('Amount ($)', 'amount', { type: 'number', required: true }))
+        + fld('Job / description', 'job') + two(fld('Due', 'due', { placeholder: 'Jul 30' }), fld('Status', 'status', { options: ['Draft', 'Sent'] })),
+      save: (d) => { const iv = { id: '#' + (1043 + D.invoices.length), client: d.client, job: d.job || '—', amount: +d.amount || 0, status: d.status || 'Draft', due: d.due || '—', chased: false }; D.invoices.unshift(iv); return iv; },
+      done: (iv) => toast('Invoice created', iv.id + ' · ' + money(iv.amount), 'ok'),
+    },
+    sequence: {
+      title: 'New follow-up sequence', submit: 'Create sequence',
+      body: () => fld('Sequence name', 'name', { required: true, placeholder: 'e.g. Quote nudge' })
+        + two(fld('Trigger', 'trigger', { options: ['New lead', 'Quote sent', 'Job complete', 'No reply in 3 days'] }), fld('Channel', 'channel', { options: ['SMS', 'Email', 'SMS → Email'] }))
+        + fld('Steps', 'steps', { options: ['1 step', '2 steps', '3 steps', '4 steps'] }),
+      save: (d) => { D.followups.unshift({ id: 'F-' + (92 + D.followups.length), client: 'Next matching lead', re: d.name, when: 'Queued', channel: (d.channel || 'SMS').split(' ')[0], seq: d.name + ' · step 1', auto: true }); return d; },
+      done: (d) => toast('Sequence created', d.name + ' is now live', 'ok'),
+    },
+  };
+  function openCreate(kind) {
+    const c = CREATE[kind]; if (!c) return;
+    openModal({ title: c.title, sub: 'Demo — saved to this session only.', submitLabel: c.submit, body: c.body(),
+      onSubmit: (d) => { const rec = c.save(d); closeModal(); reRender(); if (c.done) c.done(rec); } });
+  }
+
+  const DETAIL = {
+    lead: (l) => ({ title: l.name, sub: l.job + ' · ' + l.loc,
+      rows: [['Status', l.status], ['Source', l.source], ['AI reply', l.ai || '—'], ['Est. value', money(l.value)], ['Received', l.received], ['Lead ID', l.id]],
+      actions: `<button class="btn btn-ghost btn-sm" data-action="lead-reply" data-id="${l.id}">${fill('bolt')} Send instant reply</button>
+        <button class="btn btn-primary btn-sm" data-action="lead-win" data-id="${l.id}">${svg('check')} Mark won</button>` }),
+    quote: (q) => ({ title: q.id, sub: q.client + ' · ' + q.job,
+      rows: [['Amount', money(q.amount)], ['Status', q.status], ['Origin', q.ai ? 'AI draft' : 'Manual'], ['Date', q.date]],
+      actions: `<button class="btn btn-primary btn-sm" data-action="quote-accept" data-id="${q.id}">${svg('check')} Mark accepted</button>` }),
+    invoice: (iv) => ({ title: iv.id, sub: iv.client + ' · ' + iv.job,
+      rows: [['Amount', money(iv.amount)], ['Status', iv.status], ['Due', iv.due], ['Auto-chasing', iv.chased ? 'Yes' : 'No']],
+      actions: `<button class="btn btn-primary btn-sm" data-action="invoice-paid" data-id="${iv.id}">${svg('check')} Mark paid</button>` }),
+    job: (j) => ({ title: j.title, sub: j.client + ' · ' + j.tag,
+      rows: [['Value', money(j.value)], ['Crew', j.crew.join(', ')], ['Timing', j.when], ['Job ID', j.id]],
+      actions: `<button class="btn btn-ghost btn-sm" data-action="soon" data-label="Crew messaging">${svg('msg')} Message crew</button>` }),
+  };
+  const findRec = (kind, id) => kind === 'job'
+    ? Object.values(D.jobs).flat().find((x) => x.id === id)
+    : (D[kind + 's'] || []).find((x) => x.id === id);
+  function openDetail(kind, id) {
+    const rec = findRec(kind, id); if (!rec || !DETAIL[kind]) return;
+    const d = DETAIL[kind](rec);
+    openModal({ title: d.title, sub: d.sub, actions: d.actions,
+      body: `<div class="detail-kv">${d.rows.map(([k, v]) => `<div class="kv"><span class="k">${k}</span><span class="v">${v}</span></div>`).join('')}</div>` });
+  }
 
   /* ============================================================ ROUTER */
   const TITLES = { dashboard: 'Dashboard', leads: 'Leads', quotes: 'Quotes', jobs: 'Jobs', invoices: 'Invoices', followups: 'Follow-ups', automations: 'Automations', settings: 'Settings' };
@@ -375,6 +497,7 @@
 
   // "/" focuses search
   document.addEventListener('keydown', (e) => {
+    if (e.key === 'Escape') closeModal();
     if (e.key === '/' && !/input|textarea/i.test(e.target.tagName)) { e.preventDefault(); $('.search input')?.focus(); }
   });
 
@@ -444,7 +567,40 @@
       const res = await AE.run('instant-quote', { job: 'Bathroom renovation', value: 15200 });
       setTimeout(() => toast('Quote drafted', res.summary + ' — ready to review', 'ok'), 1100);
     }
+
+    if (act === 'new') openCreate(t.dataset.kind);
+    if (act === 'open') openDetail(t.dataset.kind, t.dataset.id);
+    if (act === 'filter-lead') { state.leadFilter.status = t.dataset.status; reRender(); }
+    if (act === 'soon') toast(t.dataset.label || 'Coming soon', 'Fully wired in the production build.', '');
+    if (act === 'connect') { const name = t.dataset.name; t.outerHTML = badge('Connected', 'ok'); toast(name + ' connected', 'Integration is now active.', 'ok'); }
+    if (act === 'save-settings') toast('Settings saved', 'Your workspace has been updated.', 'ok');
+    if (act === 'set-tab') { $$('.set-nav a').forEach((a) => a.classList.toggle('active', a === t)); toast(t.dataset.tab, 'Section shown (demo).', ''); }
+
+    if (act === 'lead-reply') { const l = findRec('lead', t.dataset.id); closeModal(); const res = await AE.run('instant-reply', l || {}); toast('Instant Reply sent', res.summary, 'ok'); }
+    if (act === 'lead-win') { const l = findRec('lead', t.dataset.id); if (l) l.status = 'Won'; closeModal(); reRender(); updateCounts(); toast('Marked won 🎉', (l ? l.name : '') + ' moved to Won', 'ok'); }
+    if (act === 'quote-accept') { const q = findRec('quote', t.dataset.id); if (q) q.status = 'Accepted'; closeModal(); reRender(); toast('Quote accepted', q ? q.id : '', 'ok'); }
+    if (act === 'invoice-paid') { const iv = findRec('invoice', t.dataset.id); if (iv) { iv.status = 'Paid'; iv.chased = false; } closeModal(); reRender(); updateCounts(); toast('Invoice paid', iv ? iv.id + ' · ' + money(iv.amount) : '', 'ok'); }
   });
+
+  // selects (filters)
+  document.addEventListener('change', (e) => {
+    const t = e.target.closest('[data-action]'); if (!t) return;
+    if (t.dataset.action === 'filter-source') { state.leadFilter.source = t.value; reRender(); }
+  });
+
+  // topbar search filters leads on Enter
+  const searchInput = $('.search input');
+  if (searchInput) searchInput.addEventListener('keydown', (e) => {
+    if (e.key !== 'Enter') return;
+    state.leadFilter.q = searchInput.value.trim();
+    if ((location.hash.replace(/^#\//, '') || 'dashboard') === 'leads') reRender();
+    else location.hash = '#/leads';
+    searchInput.blur();
+  });
+
+  // account / workspace chrome
+  $('.avatar')?.addEventListener('click', () => toast('Eli D. · Owner', 'Manage your account in Settings.', ''));
+  $('#workspacePill')?.addEventListener('click', () => toast('Blackbeam LLC', 'Workspace switching lands in the full product.', ''));
 
   document.addEventListener('automations:changed', updateCounts);
 
